@@ -8,5 +8,13 @@ services:
     command: [ "sh", "-c", "sleep infinity" ]
     environment:
       - TEST_DIR=${T_BENCH_TEST_DIR}
+      # Altimate/Datamate configuration
+      - ALTIMATE_URL=${ALTIMATE_URL:-}
+      - ALTIMATE_API_URL=${ALTIMATE_API_URL:-}
+      - DATAMATE_MCP_TOKEN=${DATAMATE_MCP_TOKEN:-}
+      - DATAMATE_MCP_ID=${DATAMATE_MCP_ID:-}
+      - DATAMATE_MCP_TENANT=${DATAMATE_MCP_TENANT:-}
+      - DATAMATE_MCP_URL=${DATAMATE_MCP_URL:-}
+      - DATAMATE_ALTIMATE_URL=${DATAMATE_ALTIMATE_URL:-}
     volumes:
       - ${T_BENCH_TASK_LOGS_PATH}:${T_BENCH_CONTAINER_LOGS_PATH}

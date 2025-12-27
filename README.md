@@ -399,12 +399,40 @@ Configuration files for each agent are found in the `/shared/config` directory. 
 
 ### Enabling the MCP server
 
-If run with the flag `--use-mcp`, ADE-bench will create a dbt MCP server that the agent is allowed to use. The following databases and agents are supported:
+If run with the flag `--use-mcp`, ADE-bench will create an MCP server that the agent is allowed to use. There are two MCP server options available:
 
-- Databases: `snowflake` (duckdb doesn't support multiple simultaneous connections)
-- Agents: `claude`, `codex`, `gemini`
+#### Datamate (default)
+
+[Datamate](https://github.com/AltimateAI/datamate) is an MCP server from Altimate that provides dbt tooling capabilities. It's the default MCP server and works with all database types including DuckDB.
+
+```bash
+# Use datamate (default)
+ade run airbnb001 --db duckdb --project-type dbt --agent claude --use-mcp
+
+# Explicitly set datamate
+MCP_SERVER_TYPE=datamate ade run airbnb001 --db duckdb --project-type dbt --agent claude --use-mcp
+```
+
+**Required configuration** (in `.env`):
+- `DATAMATE_MCP_TOKEN` - Your datamate authentication token
+
+#### dbt-mcp
+
+The [dbt-mcp](https://github.com/dbt-labs/dbt-mcp) server provides access to dbt CLI tools. It only works with Snowflake (DuckDB doesn't support multiple simultaneous connections required by dbt-mcp).
+
+```bash
+# Use dbt-mcp instead of datamate
+MCP_SERVER_TYPE=dbt-mcp ade run airbnb001 --db snowflake --project-type dbt --agent claude --use-mcp
+```
 
 Because the server runs locally, it only has access to the [CLI tools](https://github.com/dbt-labs/dbt-mcp#tools). The others are disabled, because they require access to the dbt platform.
+
+#### Supported configurations
+
+| MCP Server | DuckDB | Snowflake | Agents |
+|------------|--------|-----------|--------|
+| datamate   | ✓      | ✓         | claude, codex, gemini |
+| dbt-mcp    | ✗      | ✓         | claude, codex, gemini |
 
 ### The Sage agent
 
@@ -454,6 +482,18 @@ DOCKER_DEFAULT_PLATFORM=linux/amd64
 USE_DYNAMIC_LOGGING=TRUE # Set to FALSE if you want normal logs and not a fancy table.
 FILE_DIFF_EXCLUDE_PATHS=/tmp,/logs,/var,/target,/build,/node_modules
 LOG_LEVEL=INFO
+
+# MCP Server Configuration
+MCP_SERVER_TYPE=datamate # Options: "datamate" (default) or "dbt-mcp"
+
+# Datamate/Altimate Configuration (required when using datamate MCP server)
+ALTIMATE_URL=https://api.getaltimate.com/
+ALTIMATE_API_URL=https://api.getaltimate.com/
+DATAMATE_MCP_URL=http://localhost:7700/sse
+DATAMATE_MCP_TOKEN=[your datamate token] # Required for datamate MCP
+DATAMATE_MCP_ID=50
+DATAMATE_MCP_TENANT=megatenant
+DATAMATE_ALTIMATE_URL=https://api.getaltimate.com
 ```
 
 ### Snowflake setup

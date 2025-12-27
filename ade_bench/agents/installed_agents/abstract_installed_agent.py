@@ -100,9 +100,11 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                 max_timeout_sec=config.setup_timeout_sec,  # Use setup timeout for env setup
             )
 
+            # Log agent installation to dedicated file (will be available in sessions/ via volume mount)
+            install_log_path = "/logs/agent-install.log"
             session.send_keys(
                 [
-                    "source /installed-agent/install-agent.sh",
+                    f"source /installed-agent/install-agent.sh 2>&1 | tee {install_log_path}",
                     "Enter",
                 ],
                 block=True,
@@ -122,9 +124,12 @@ class AbstractInstalledAgent(BaseAgent, ABC):
                 db_type = self._variant_config.get('db_type', 'unknown')
                 project_type = self._variant_config.get('project_type', 'unknown')
                 agent_name = self.NAME.value if hasattr(self.NAME, 'value') else str(self.NAME)
+
+                # Log to dedicated setup log file (will be available in sessions/ via volume mount)
+                setup_log_path = "/logs/mcp-setup.log"
                 session.send_keys(
                     [
-                        f"bash /scripts/setup-dbt-mcp.sh {db_type} {project_type} {agent_name}",
+                        f"bash /scripts/setup-dbt-mcp.sh {db_type} {project_type} {agent_name} 2>&1 | tee {setup_log_path}",
                         "Enter",
                     ],
                     block=True,

@@ -14,14 +14,18 @@ RUN pip install --no-cache-dir \
     pyyaml>=6.0 \
     uv>=0.7
 
-# Pre-install dbt-mcp to speed up MCP setup
-# NOT NEEDED BECAUSE MCP IS NOT SUPPORTED FOR DUCKDB
-# RUN uv tool install dbt-mcp
-# ENV PATH="/root/.local/bin:${PATH}"
+# Install datamate for MCP support
+RUN npm install -g @altimateai/datamate
+
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Set up workspace
-
 RUN mkdir -p /installed-agent /scripts /sage/solutions /sage /app /app/setup /app/migrations /seeds /solutions /logs /tests
 WORKDIR /app
 
+# Copy and setup entrypoint script
+COPY docker/base/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]

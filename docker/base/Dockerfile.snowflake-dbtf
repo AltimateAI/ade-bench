@@ -22,11 +22,19 @@ RUN pip install --no-cache-dir \
 
 # Pre-install dbt-mcp to speed up MCP setup
 RUN uv tool install dbt-mcp
+
+# Install datamate for MCP support
+RUN npm install -g @altimateai/datamate
+
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Set up workspace
-
 RUN mkdir -p /installed-agent /scripts /sage/solutions /sage /app /app/setup /app/migrations /seeds /solutions /logs /tests
 WORKDIR /app
 
+# Copy and setup entrypoint script
+COPY docker/base/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]
